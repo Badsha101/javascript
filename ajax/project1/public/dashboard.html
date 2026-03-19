@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AJAX Authentication</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard">
+            <div class="dashboard-header">
+                <h2>Welcome to Dashboard</h2>
+                <button onclick="logout()" class="btn-logout">Logout</button>
+            </div>
+            
+            <!-- User Info Card -->
+            <div class="user-card">
+                <h3>User Information</h3>
+                <div id="userInfo" class="user-info">
+                    <p>Loading...</p>
+                </div>
+            </div>
+            
+            <!-- Protected Data -->
+            <div class="data-card">
+                <h3>Protected Data</h3>
+                <button onclick="loadProtectedData()" class="btn-load">
+                    Load Protected Data
+                </button>
+                <div id="protectedData" class="protected-data"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/main.js"></script>
+</body>
+</html>

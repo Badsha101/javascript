@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJAX Login System with XMLHttpRequest</title>
+    <style>
+        /* ===== CSS স্টাইল ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .auth-container h2 {
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5a67d8;
+        }
+
+        .message {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .message.error {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #fc8181;
+        }
+
+        .message.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        a {
+            color: #667eea;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .user-card {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .user-card h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+
+        .user-info p {
+            margin: 10px 0;
+            color: #2d3748;
+        }
+
+        .btn-logout {
+            background: #e53e3e;
+            margin-top: 20px;
+        }
+
+        .btn-logout:hover {
+            background: #c53030;
+        }
+
+        .btn-load {
+            background: #48bb78;
+            margin: 20px 0;
+        }
+
+        .btn-load:hover {
+            background: #38a169;
+        }
+
+        .protected-data {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #e2e8f0;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ===== LOGIN SECTION ===== -->
+        <div id="loginSection" class="auth-container">
+            <h2>🔐 Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required 
+                           placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required 
+                           placeholder="••••••••">
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <div id="loginMessage" class="message"></div>
+            <div id="loginLoading" class="loading hidden">⏳ Processing...</div>
+            <p>Don't have an account? <a href="#" id="showRegisterLink">Register here</a></p>
+        </div>
+
+        <!-- ===== REGISTER SECTION ===== -->
+        <div id="registerSection" class="auth-container hidden">
+            <h2>📝 Register</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="regName">Full Name:</label>
+                    <input type="text" id="regName" name="name" required 
+                           placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">Email:</label>
+                    <input type="email" id="regEmail" name="email" required 
+                           placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Password:</label>
+                    <input type="password" id="regPassword" name="password" required 
+                           placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label for="regConfirmPassword">Confirm Password:</label>
+                    <input type="password" id="regConfirmPassword" required 
+                           placeholder="••••••••">
+                </div>
+                <button type="submit">Register</button>
+            </form>
+            <div id="registerMessage" class="message"></div>
+            <div id="registerLoading" class="loading hidden">⏳ Processing...</div>
+            <p>Already have an account? <a href="#" id="showLoginLink">Login here</a></p>
+        </div>
+
+        <!-- ===== DASHBOARD SECTION ===== -->
+        <div id="dashboardSection" class="auth-container hidden">
+            <h2>📊 Dashboard</h2>
+            <div class="user-card">
+                <h3>User Information</h3>
+                <div id="userInfo" class="user-info">
+                    <p>Loading...</p>
+                </div>
+            </div>
+            <button onclick="loadProtectedData()" class="btn-load">Load Protected Data</button>
+            <div id="protectedData" class="protected-data"></div>
+            <button onclick="logout()" class="btn-logout">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== XMLHttpRequest দিয়ে AJAX Implementation =====
+        
+        // API Base URL
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        // DOM Elements
+        const loginSection = document.getElementById('loginSection');
+        const registerSection = document.getElementById('registerSection');
+        const dashboardSection = document.getElementById('dashboardSection');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const loginMessage = document.getElementById('loginMessage');
+        const registerMessage = document.getElementById('registerMessage');
+        const loginLoading = document.getElementById('loginLoading');
+        const registerLoading = document.getElementById('registerLoading');
+        const showRegisterLink = document.getElementById('showRegisterLink');
+        const showLoginLink = document.getElementById('showLoginLink');
+
+        // ===== HELPER FUNCTIONS =====
+        function showMessage(element, text, type) {
+            element.textContent = text;
+            element.className = `message ${type}`;
+        }
+
+        function clearMessage(element) {
+            element.textContent = '';
+            element.className = 'message';
+        }
+
+        function showLoading(loadingElement, show) {
+            if (show) {
+                loadingElement.classList.remove('hidden');
+            } else {
+                loadingElement.classList.add('hidden');
+            }
+        }
+
+        // ===== UI TOGGLE FUNCTIONS =====
+        function showLogin() {
+            loginSection.classList.remove('hidden');
+            registerSection.classList.add('hidden');
+            dashboardSection.classList.add('hidden');
+            clearMessage(loginMessage);
+        }
+
+        function showRegister() {
+            registerSection.classList.remove('hidden');
+            loginSection.classList.add('hidden');
+            dashboardSection.classList.add('hidden');
+            clearMessage(registerMessage);
+        }
+
+        function showDashboard() {
+            dashboardSection.classList.remove('hidden');
+            loginSection.classList.add('hidden');
+            registerSection.classList.add('hidden');
+            displayUserInfo();
+        }
+
+        // ===== DASHBOARD FUNCTIONS =====
+        function displayUserInfo() {
+            const userInfo = document.getElementById('userInfo');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (user && user.name) {
+                userInfo.innerHTML = `
+                    <p><strong>Name:</strong> ${user.name}</p>
+                    <p><strong>Email:</strong> ${user.email}</p>
+                    <p><strong>User ID:</strong> ${user.id || 'N/A'}</p>
+                    <p><strong>Last Login:</strong> ${new Date().toLocaleString()}</p>
+                `;
+            } else {
+                userInfo.innerHTML = '<p>No user information available.</p>';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            showLogin();
+        }
+
+        // ===== XMLHttpRequest FUNCTION =====
+        function makeRequest(method, url, data, callback) {
+            const xhr = new XMLHttpRequest();
+            xhr.open(method, url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            
+            if (localStorage.getItem('authToken')) {
+                xhr.setRequestHeader('Authorization', 'Bearer ' + localStorage.getItem('authToken'));
+            }
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    let responseData;
+                    try {
+                        responseData = JSON.parse(xhr.responseText);
+                    } catch (e) {
+                        responseData = { message: 'Invalid server response' };
+                    }
+                    callback({
+                        status: xhr.status,
+                        data: responseData
+                    });
+                }
+            };
+            
+            xhr.onerror = function() {
+                callback({
+                    status: 0,
+                    data: { message: 'Network error occurred' }
+                });
+            };
+            
+            xhr.send(data ? JSON.stringify(data) : null);
+        }
+
+        // ===== LOGIN FORM HANDLER =====
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                showLoading(loginLoading, true);
+                clearMessage(loginMessage);
+                
+                makeRequest('POST', `${API_BASE_URL}/login`, { email, password }, function(response) {
+                    showLoading(loginLoading, false);
+                    
+                    if (response.status === 200) {
+                        localStorage.setItem('authToken', response.data.token);
+                        localStorage.setItem('user', JSON.stringify(response.data.user));
+                        showMessage(loginMessage, 'Login successful! Redirecting...', 'success');
+                        setTimeout(showDashboard, 1500);
+                    } else {
+                        showMessage(loginMessage, response.data.message || 'Login failed!', 'error');
+                    }
+                });
+            });
+        }
+
+        // ===== REGISTER FORM HANDLER =====
+        if (registerForm) {
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('regName').value;
+                const email = document.getElementById('regEmail').value;
+                const password = document.getElementById('regPassword').value;
+                const confirmPassword = document.getElementById('regConfirmPassword').value;
+                
+                if (password !== confirmPassword) {
+                    showMessage(registerMessage, 'Passwords do not match!', 'error');
+                    return;
+                }
+                
+                showLoading(registerLoading, true);
+                clearMessage(registerMessage);
+                
+                makeRequest('POST', `${API_BASE_URL}/register`, { name, email, password }, function(response) {
+                    showLoading(registerLoading, false);
+                    
+                    if (response.status === 201) {
+                        showMessage(registerMessage, 'Registration successful! Please login.', 'success');
+                        registerForm.reset();
+                        setTimeout(showLogin, 2000);
+                    } else {
+                        showMessage(registerMessage, response.data.message || 'Registration failed!', 'error');
+                    }
+                });
+            });
+        }
+
+        // ===== LOAD PROTECTED DATA =====
+        function loadProtectedData() {
+            const protectedDataDiv = document.getElementById('protectedData');
+            protectedDataDiv.innerHTML = '<p>Loading...</p>';
+            
+            makeRequest('GET', `${API_BASE_URL}/protected-data`, null, function(response) {
+                if (response.status === 200) {
+                    protectedDataDiv.innerHTML = `
+                        <h4>🔒 Protected Information:</h4>
+                        <pre>${JSON.stringify(response.data, null, 2)}</pre>
+                    `;
+                } else if (response.status === 401) {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('user');
+                    showLogin();
+                } else {
+                    protectedDataDiv.innerHTML = `<p class="error">Error: ${response.data.message}</p>`;
+                }
+            });
+        }
+
+        // ===== EVENT LISTENERS FOR LINKS =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                showDashboard();
+            }
+            
+            // Register link
+            if (showRegisterLink) {
+                showRegisterLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showRegister();
+                });
+            }
+            
+            // Login link
+            if (showLoginLink) {
+                showLoginLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showLogin();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
